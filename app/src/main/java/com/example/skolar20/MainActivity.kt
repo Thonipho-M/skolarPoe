@@ -1,25 +1,31 @@
 package com.example.skolar20
 
+import android.content.Context
 import android.os.Build
 import android.os.Bundle
-import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.annotation.RequiresApi
+import androidx.appcompat.app.AppCompatActivity
 import androidx.biometric.BiometricManager
 import androidx.biometric.BiometricPrompt
 import androidx.core.content.ContextCompat
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import com.example.skolar20.ui.App
 import com.example.skolar20.ui.theme.Skolar20Theme
+import com.example.skolar20.util.LocaleHelper
 import com.example.skolar20.util.Preferences
 import com.google.firebase.auth.FirebaseAuth
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.appcompat.app.AppCompatActivity
-
 
 class MainActivity : AppCompatActivity() {
+
+    // Wrap context with saved locale BEFORE anything else so resources pick correct language
+    override fun attachBaseContext(newBase: Context) {
+        val wrapped = LocaleHelper.applySavedLocale(newBase)
+        super.attachBaseContext(wrapped)
+    }
 
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
