@@ -18,6 +18,7 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
+        // Your demo Firebase config
         buildConfigField("String", "FIREBASE_PROJECT_ID", "\"skolar-demo\"")
         buildConfigField("String", "FIREBASE_WEB_API_KEY", "\"AIzaSyCHMlF9hXblTHk_fFRHmMiquHKjopke1N0\"")
     }
@@ -32,45 +33,52 @@ android {
         }
     }
 
-    // Recommended with AGP 8+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
-    kotlinOptions { jvmTarget = "17" }
+    kotlinOptions {
+        jvmTarget = "17"
+    }
 
     buildFeatures {
         compose = true
-        buildConfig = true   // ✅ correct way
+        buildConfig = true
     }
 
-    // If your setup needs it; otherwise omit (the compose plugin may manage this)
-    // composeOptions { kotlinCompilerExtensionVersion = "1.5.15" }
+    // If you need to pin a specific Compose compiler, uncomment and adjust:
+    // composeOptions {
+    //     kotlinCompilerExtensionVersion = "1.5.15"
+    // }
 }
 
 dependencies {
-    // --- Navigation (Compose only) ---
-    implementation("androidx.navigation:navigation-compose:2.8.1")
-    // remove: implementation(libs.androidx.navigation.common.android)
 
-    // --- HTTP + JSON ---
+    // ---------- Navigation ----------
+    implementation("androidx.navigation:navigation-compose:2.8.1")
+
+    // ---------- Biometrics ----------
+    // This alias in libs.versions.toml should map to:
+    // androidx.biometric:biometric:1.1.0
+    implementation(libs.androidx.biometric)
+
+    // ---------- Firebase ----------
+    implementation(platform("com.google.firebase:firebase-bom:34.3.0"))
+    implementation("com.google.firebase:firebase-auth")
+    implementation("com.google.firebase:firebase-messaging")
+    implementation("com.google.android.gms:play-services-auth:21.2.0")
+
+    // ---------- HTTP + JSON ----------
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
     implementation("com.squareup.okhttp3:logging-interceptor:4.12.0")
     implementation("com.google.code.gson:gson:2.11.0")
 
-    // --- Coroutines ---
+    // ---------- Coroutines ----------
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.9.0")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.9.0")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.9.0")
 
-    // --- Firebase (use ONE BOM + ONE Auth dep) ---
-    implementation(platform("com.google.firebase:firebase-bom:34.3.0")) // keep this
-    implementation("com.google.firebase:firebase-auth")             // keep this
-    implementation("com.google.android.gms:play-services-auth:21.2.0")
-    // remove: implementation(platform("com.google.firebase:firebase-bom:33.3.0"))
-    // remove: implementation(libs.firebase.auth.ktx)  // duplicate
-
-    // --- AndroidX (from your version catalog) ---
+    // ---------- AndroidX / Compose (from version catalog) ----------
     implementation("androidx.core:core-splashscreen:1.0.1")
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
@@ -81,6 +89,9 @@ dependencies {
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
     implementation(libs.androidx.ui.text)
+    implementation(libs.androidx.appcompat)
+
+    // ---------- Testing ----------
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

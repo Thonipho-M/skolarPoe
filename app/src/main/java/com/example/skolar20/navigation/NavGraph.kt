@@ -18,7 +18,7 @@ fun SkolarNavGraph(navController: NavHostController) {
         composable(NavDestination.Home.route) { HomeScreen(navController) }
         composable(NavDestination.Tutors.route) { TutorsScreen(navController) }
         composable(NavDestination.Bookings.route) { BookingsScreen(navController) }
-        composable(NavDestination.Messages.route) { ComingSoonScreen() }
+        composable(NavDestination.Messages.route) { MessagesScreen()}
         composable(NavDestination.Settings.route) { SettingsScreen() }
 
         // booking_new?tutorId=<id> (tutorId is optional)

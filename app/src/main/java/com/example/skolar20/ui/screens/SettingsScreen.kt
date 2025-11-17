@@ -1,141 +1,190 @@
 package com.example.skolar20.ui.screens
 
+import android.os.Build
+import androidx.annotation.RequiresApi
+import androidx.activity.ComponentActivity
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
+import androidx.compose.material3.TextField
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import com.google.android.gms.auth.api.signin.GoogleSignIn
-import com.google.android.gms.auth.api.signin.GoogleSignInOptions
-import com.google.android.gms.common.api.ApiException
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.GoogleAuthProvider
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalDensity
 import com.example.skolar20.R
+import com.example.skolar20.util.LocaleHelper
+import com.example.skolar20.util.Preferences
+import com.google.firebase.auth.FirebaseAuth
+import kotlinx.coroutines.launch
 
+@OptIn(ExperimentalMaterial3Api::class)
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun SettingsScreen() {
     val context = LocalContext.current
     val auth = remember { FirebaseAuth.getInstance() }
-    var currentUser by remember { mutableStateOf(auth.currentUser) }
+    val scope = rememberCoroutineScope()
+
     var info by remember { mutableStateOf<String?>(null) }
-    var error by remember { mutableStateOf<String?>(null) }
+    var biometricEnabled by remember { mutableStateOf(Preferences.isBiometricEnabled(context)) }
+    var notificationsEnabled by remember { mutableStateOf(true) }
+    var syncing by remember { mutableStateOf(false) }
+    var syncMessage by remember { mutableStateOf<String?>(null) }
 
-    // Listen for auth changes so UI stays in sync
-    DisposableEffect(Unit) {
-        val listener = FirebaseAuth.AuthStateListener { firebaseAuth ->
-            currentUser = firebaseAuth.currentUser
-        }
-        auth.addAuthStateListener(listener)
-        onDispose { auth.removeAuthStateListener(listener) }
+    // Language setup
+    val savedLang = Preferences.getSelectedLanguage(context) ?: "en"
+    var expanded by remember { mutableStateOf(false) }
+
+    // Important: use stringResource inside composition so it resolves per locale
+    val languages = listOf(
+        "en" to stringResource(id = R.string.lang_en),
+        "zu" to stringResource(id = R.string.lang_zu)
+    )
+
+    var selectedLangCode by remember { mutableStateOf(savedLang) }
+    var selectedLangLabel by remember {
+        mutableStateOf(languages.find { it.first == savedLang }?.second ?: languages.first().second)
     }
-
-    // Google client (needs default_web_client_id from google-services.json)
-    val gso = remember {
-        GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-            .requestIdToken(context.getString(R.string.default_web_client_id))
-            .requestEmail()
-            .build()
-    }
-    val googleClient = remember { GoogleSignIn.getClient(context, gso) }
-
-    // Detect sign-in provider(s)
-    val providers = currentUser?.providerData?.mapNotNull { it.providerId } ?: emptyList()
-    val isGoogle = providers.contains(GoogleAuthProvider.PROVIDER_ID)
-    val isPassword = providers.contains("password")
-
-    // Your previous local settings
-    var lang by remember { mutableStateOf("English") }
-    var notifications by remember { mutableStateOf(true) }
 
     Column(
-        Modifier
+        modifier = Modifier
             .fillMaxSize()
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        Text("Settings", style = MaterialTheme.typography.titleLarge)
+        Text(text = stringResource(id = R.string.settings_title), style = MaterialTheme.typography.titleLarge)
 
-        // --- Account section ---
-        Card {
-            Column(Modifier.fillMaxWidth().padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                Text("Account", style = MaterialTheme.typography.titleMedium)
+        Text(
+            text = auth.currentUser?.email ?: stringResource(id = R.string.settings_not_signed_in),
+            style = MaterialTheme.typography.bodyMedium
+        )
 
-                if (currentUser != null) {
-                    Text("Signed in as: ${currentUser?.displayName ?: "(no name)"}")
-                    Text("Email: ${currentUser?.email ?: "(none)"}")
-                    if (providers.isNotEmpty()) {
-                        Text("Provider: ${providers.joinToString()}")
-                    }
+        Divider()
 
-                    Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                        OutlinedButton(onClick = {
-                            // Sign out of Firebase; also sign out Google client to clear cached account
-                            auth.signOut()
-                            googleClient.signOut()
-                            info = "Signed out."
-                            error = null
-                        }) { Text("Sign out") }
+        // Language selector
+        Text(text = stringResource(id = R.string.settings_language), style = MaterialTheme.typography.titleMedium)
 
-                        if (isGoogle) {
-                            OutlinedButton(onClick = {
-                                // Revoke app access from the Google account
-                                googleClient.revokeAccess().addOnCompleteListener {
-                                    auth.signOut()
-                                    info = "Google access revoked."
-                                    error = null
-                                }
-                            }) { Text("Revoke access") }
+        ExposedDropdownMenuBox(
+            expanded = expanded,
+            onExpandedChange = { expanded = !expanded }
+        ) {
+            // <-- menuAnchor() is the important fix
+            TextField(
+                value = selectedLangLabel,
+                onValueChange = {},
+                readOnly = true,
+                label = { Text(text = stringResource(id = R.string.settings_language_summary)) },
+                trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .menuAnchor()    // <-- anchors dropdown to this field
+            )
+
+            ExposedDropdownMenu(
+                expanded = expanded,
+                onDismissRequest = { expanded = false }
+            ) {
+                languages.forEach { (code, label) ->
+                    DropdownMenuItem(
+                        text = { Text(text = label) },
+                        onClick = {
+                            expanded = false
+                            selectedLangCode = code
+                            selectedLangLabel = label
+                            // persist selection & apply immediately
+                            Preferences.setSelectedLanguage(context, code)
+                            LocaleHelper.setLocale(context, code)
+                            (context as? ComponentActivity)?.recreate()
                         }
-                    }
-
-                    if (isPassword) {
-                        OutlinedButton(onClick = {
-                            val email = currentUser?.email
-                            if (email.isNullOrBlank()) {
-                                error = "No email on this account."
-                                info = null
-                            } else {
-                                auth.sendPasswordResetEmail(email).addOnCompleteListener { t ->
-                                    if (t.isSuccessful) {
-                                        info = "Password reset email sent to $email."
-                                        error = null
-                                    } else {
-                                        error = t.exception?.localizedMessage ?: "Could not send reset email."
-                                        info = null
-                                    }
-                                }
-                            }
-                        }) { Text("Send password reset email") }
-                    }
-                } else {
-                    Text("Not signed in")
+                    )
                 }
-
-                if (info != null) Text(info!!, color = MaterialTheme.colorScheme.primary)
-                if (error != null) Text("Error: $error", color = MaterialTheme.colorScheme.error)
             }
         }
 
-        // --- Language (kept from your screen) ---
-        Text("Language")
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            FilterChip(selected = lang == "English", onClick = { lang = "English" }, label = { Text("English") })
-            FilterChip(selected = lang == "isiZulu", onClick = { lang = "isiZulu" }, label = { Text("isiZulu") })
-            FilterChip(selected = lang == "Afrikaans", onClick = { lang = "Afrikaans" }, label = { Text("Afrikaans") })
+        Divider()
+
+        // Biometric toggle
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Text(stringResource(id = R.string.settings_biometric))
+            Switch(
+                checked = biometricEnabled,
+                onCheckedChange = {
+                    biometricEnabled = it
+                    Preferences.setBiometricEnabled(context, it)
+                    info = if (it) {
+                        context.getString(R.string.settings_biometric_enabled_msg)
+                    } else {
+                        context.getString(R.string.settings_biometric_disabled_msg)
+                    }
+                }
+            )
         }
 
-        // --- Notifications (kept) ---
+        // Notifications toggle (demo only)
         Row(
-            verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween,
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Text(stringResource(id = R.string.settings_notifications))
+            Switch(
+                checked = notificationsEnabled,
+                onCheckedChange = { notificationsEnabled = it }
+            )
+        }
+
+        // Offline bookings sync
+        Button(
+            onClick = {
+                scope.launch {
+                    syncing = true
+                    syncMessage = null
+                    try {
+                        val count = com.example.skolar20.data.local.syncPendingBookings(context, auth)
+                        syncMessage = context.getString(R.string.settings_sync_complete, count)
+                    } catch (e: Exception) {
+                        syncMessage = e.localizedMessage ?: "Sync failed"
+                    } finally {
+                        syncing = false
+                    }
+                }
+            },
+            enabled = !syncing,
             modifier = Modifier.fillMaxWidth()
         ) {
-            Text("Notifications")
-            Switch(checked = notifications, onCheckedChange = { notifications = it })
+            Text(
+                if (syncing)
+                    stringResource(id = R.string.settings_syncing)
+                else
+                    stringResource(id = R.string.settings_sync)
+            )
+        }
+
+        if (syncMessage != null) {
+            Text(syncMessage!!, style = MaterialTheme.typography.bodySmall)
         }
 
         Divider()
-        // Any other settings...
+
+        // Sign out
+        Button(
+            onClick = {
+                auth.signOut()
+                info = context.getString(R.string.settings_signed_out)
+            },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text(stringResource(id = R.string.settings_sign_out))
+        }
+
+        if (info != null) {
+            Text(info!!, color = MaterialTheme.colorScheme.primary)
+        }
     }
 }
