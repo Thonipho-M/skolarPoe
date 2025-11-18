@@ -1,50 +1,354 @@
-Skolar 2.0 – Tutor App developed by fullcircle
+📌 Overview
 
-A university project demonstrating a tutor-matching app with a login screen on startup, Google SSO + Email/Password authentication (Firebase Auth), a bottom-nav UI, and a working Tutors list fetched from Firestore via REST (no paid services required). Non-implemented tabs show “Feature to be implemented”.
+Team Members:
+• Jean Paul – ST10090677
+• Hemal – ST10197860
+• Faizaan – ST10358794
+• Thonipho Mavhungu – ST10121100
 
-Features:
+Skolar 2.0 is a modern mobile learning-support application designed to improve learner engagement, simplify scheduling with tutors, and provide intelligent chatbot-assisted learning. The app enables students to book tutoring sessions, access academic help, and manage their learning activities seamlessly.
 
-Auth
-- LoginScreen on startup (Google SSO + Email/Password sign-in & sign-up)
-- Settings: show current user, Sign out, Revoke Google access, Send password reset email (for email/password users)
+The application was developed by team Open Circle as part of an academic module project where the purpose was to demonstrate real-world software engineering practices such as authentication, offline-first design, cloud integration, and continuous deployment using GitHub Actions.
 
-Navigation
-- Bottom navigation: Home, Tutors (working), Bookings (TBI), Messages (TBI), Settings
+🎯 Purpose of the App
 
-Tutors (working feature)
-- Reads tutors from Cloud Firestore via REST using OkHttp + Gson
+Skolar 2.0 was created to address several challenges faced by students:
 
-Booking (working feature)
-- book tutoring lessons
+✔ 1. Difficulty accessing academic support
 
-Settings (working feature_
-- change language
+Learners often struggle to get clear answers and schedule help with tutors. Skolar solves this by allowing:
 
-Educational Content (working feature)
-- access educational content
+Quick tutor browsing
 
-Architect:
+Instant lesson bookings
 
-app/
-  src/main/
-    AndroidManifest.xml
-    java/com/example/skolar20/
-      MainActivity.kt                 // sets content -> App()
-      SkolarApp.kt                    // Application class
-      navigation/
-        NavDestinations.kt
-        NavGraph.kt                   // routes/tabs
-      ui/
-        App.kt                        // Auth gate (Login vs Main app + bottom nav)
-        screens/
-          LoginScreen.kt              // Google SSO + Email/Password
-          SettingsScreen.kt           // account actions + local settings
-          HomeScreen.kt               // quick nav
-          TutorsScreen.kt             // REST read from Firestore
-          ComingSoonScreen.kt         // placeholder for TBI features
-      data/
-        model/Tutor.kt
-        remote/FirestoreService.kt    // OkHttp + Gson Firestore REST
-  build.gradle.kts                    // app module gradle (deps, BuildConfig fields)
-build.gradle.kts                      // root plugins (AGP, Kotlin, Google services)
-settings.gradle.kts                   // repositories (google(), mavenCentral())
+Automated notifications
+
+Smart chatbot assistance
+
+✔ 2. Poor communication or delayed feedback
+
+The integrated chatbot provides learning guidance instantly, while notifications keep students informed about updates.
+
+✔ 3. Limited accessibility to learning tools
+
+The app includes:
+
+Biometric authentication
+
+Multiple languages (English & isiZulu)
+
+Offline bookings when internet is not available
+
+Syncing with the backend when the device reconnects
+
+✔ 4. Need for a simplified student support system
+
+Skolar offers:
+
+Easy navigation
+
+Clean UI/UX with Compose
+
+Centralised management of user bookings
+
+🧩 System Design Considerations
+🎨 1. UI/UX with Jetpack Compose
+
+The entire app is built using Jetpack Compose to ensure:
+
+Modern declarative UI
+
+Fast rendering
+
+Easy state management
+
+Smooth animations
+
+Theming and dynamic color support
+
+☁️ 2. Cloud Architecture (Firebase)
+
+Skolar uses Firebase for reliable backend services:
+
+Firebase Authentication – email/password login, biometric access
+
+Cloud Firestore – real-time data storage for tutors & bookings
+
+Firebase Cloud Messaging (FCM) – push notifications when chatbot responds
+
+Storage (optional) – for file or profile uploads
+
+📶 3. Offline-First Approach
+
+When the device is offline:
+
+Bookings are stored locally (SQLite / room-like OfflineDbHelper)
+
+The user is notified that the action will sync later
+
+Settings page provides a “Sync Bookings” button
+
+Once online, pending bookings are pushed to Firestore
+
+This ensures zero data loss and continuous usability.
+
+🌐 4. Multi-Language Support
+
+The system uses Android’s resources folder for:
+
+values/strings.xml (English)
+
+values-zu/strings.xml (isiZulu)
+
+All composables load text from stringResource(), allowing dynamic runtime changes.
+
+🔐 5. Security
+
+Firebase Auth token validation
+
+Biometric unlocking (face/fingerprint)
+
+Secure local storage for auth preferences
+
+Re-authentication fallback on biometric failure
+
+🔄 6. Modularity & Clean Architecture
+
+The app uses:
+
+Data layer (FirestoreService, OfflineDbHelper)
+
+Model layer (Booking, Tutor, User)
+
+UI layer (Compose Screens)
+
+Navigation layer (NavHost)
+
+Each component is testable and extendable.
+
+🔧 GitHub & GitHub Actions Usage
+🗃 GitHub Repository
+
+GitHub was used for:
+
+Version control
+
+Branching strategy
+
+Managing issues and enhancements
+
+Code review and collaboration
+
+Maintaining the README, documentation, and release notes
+
+Branches:
+
+main – stable production-ready branch
+
+develop – active development
+
+Feature branches – each new feature built independently
+
+⚙️ GitHub Actions (CI/CD Pipeline)
+
+The project uses GitHub Actions for:
+
+✔ Automated Build Pipeline
+
+Whenever code is pushed:
+
+Kotlin/Gradle build is triggered
+
+Lint checks run
+
+Unit tests run
+
+Build artifacts stored
+
+✔ Automated Deployment (Optional)
+
+If integrated, the CI pipeline can publish new APKs to:
+
+GitHub Releases
+
+Firebase App Distribution
+
+Play Store (if configured)
+
+✔ Automated Code Quality Checks
+
+Actions ensure:
+
+No broken builds
+
+No missing dependencies
+
+Code consistency across branches
+
+This ensures a professional development cycle.
+
+📝 Release Notes (Prototype → Current Version)
+
+Below are all changes made since the early prototype.
+
+📌 Version 2.0 – Stable Release (Current Version)
+🚀 New Features Added
+1. Full Firebase Integration (Innovative Feature)
+
+Real-time tutor fetching
+
+Cloud-stored bookings
+
+Protected endpoints using Firebase ID tokens
+
+Secure Firestore rules
+
+2. Offline Booking System (Innovative Feature)
+
+Users can create bookings when offline
+
+Bookings saved locally in OfflineDbHelper
+
+Sync triggered automatically or on demand
+
+Ensures no booking is ever lost
+
+3. Biometric Authentication (Innovative Feature)
+
+Fingerprint/face unlock
+
+Automatically enabled if device supports biometrics
+
+Falls back to password
+
+4. Multi-Language Support (English + isiZulu)
+
+Added translation system
+
+Language switching inside Settings screen
+
+Persists user language choice
+
+5. AI Chatbot Integration with Push Notifications
+
+Chatbot responds in real time
+
+When the chatbot sends a reply, user receives:
+✔ Push notification (via Firebase Cloud Messaging)
+✔ In-app conversation update
+
+6. Improved Booking Flow
+
+NewBookingScreen redesigned
+
+Date & time picker integration
+
+Tutor pre-selection
+
+Cleaner validation
+
+Better UI spacing and theming
+
+📌 Version 1.5 – Pre-Final Build
+Improvements
+
+Updated navigation library
+
+Fixed LiveData to Compose state issues
+
+Redesigned booking card UI
+
+Added Tutor model support
+
+Replaced hardcoded users with Firebase authentication
+
+Bug Fixes
+
+Fixed crash when booking date was not selected
+
+Fixed missing permissions for biometrics
+
+Fixed navigation flickering on login
+
+📌 Prototype (Version 1.0)
+Originally Included
+
+Basic UI mockups
+
+Static tutor list
+
+Simple navigation
+
+Minimal booking form
+
+No backend integration
+
+No authentication
+
+No chatbot
+
+No offline support
+
+This prototype served as the foundation for the rebuilt and much more advanced Skolar 2.0.
+
+▶️ How to Build and Run Skolar 2.0
+✔ Requirements
+
+Android Studio Koala or newer
+
+Minimum SDK 26
+
+Kotlin 1.9+
+
+Firebase linked to your app
+
+Google Services JSON file added under /app
+
+✔ Steps to Build
+
+Clone the repo:
+
+git clone https://github.com/yourrepo/skolar-20.git
+
+
+Open the project in Android Studio
+
+Ensure your google-services.json is inside the app/ folder
+
+Let Gradle sync
+
+Run the app on Android device or emulator
+
+✔ Using the App
+🔐 Login / Register
+
+Create an account via Firebase Auth
+
+Enable biometrics in Settings for faster login
+
+🧑‍🏫 Book a Tutoring Session
+
+Select a tutor
+
+Pick a date and time
+
+Add notes (optional)
+
+Submit
+
+If offline → booking saved locally and syncs later.
+
+🤖 Chatbot
+
+Ask any academic question
+
+Receive push notifications when bot replies
+
+⚙ Settings
+
+Change language
+
+Force sync bookings
+
+Enable biometrics

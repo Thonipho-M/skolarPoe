@@ -1,6 +1,7 @@
 [versions]
 agp = "8.9.1"
 biometric = "1.1.0"
+composeBomVersion = "2024.07.00"
 kotlin = "2.0.21"
 coreKtx = "1.17.0"
 junit = "4.13.2"
@@ -13,9 +14,14 @@ navigationCommonAndroid = "2.9.5"
 firebaseAuthKtx = "24.0.1"
 biometricKtx = "1.1.0"
 appcompat = "1.7.1"
+firebaseCrashlyticsBuildtools = "3.0.6"
+uiTestJunit4 = "1.9.4"
+uiTestManifest = "1.9.4"
 
 [libraries]
 androidx-biometric = { module = "androidx.biometric:biometric", version.ref = "biometric" }
+androidx-compose-bom-v20240700 = { module = "androidx.compose:compose-bom", version.ref = "composeBomVersion" }
+androidx-compose-ui-ui-test-junit4 = { module = "androidx.compose.ui:ui-test-junit4", version.ref = "uiTestJunit4" }
 androidx-ui-text = { module = "androidx.compose.ui:ui-text" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 firebase-messaging-ktx = { module = "com.google.firebase:firebase-messaging-ktx" }
@@ -36,6 +42,9 @@ androidx-navigation-common-android = { group = "androidx.navigation", name = "na
 firebase-auth-ktx = { group = "com.google.firebase", name = "firebase-auth-ktx", version.ref = "firebaseAuthKtx" }
 androidx-biometric-ktx = { group = "androidx.biometric", name = "biometric-ktx", version.ref = "biometricKtx" }
 androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
+firebase-crashlytics-buildtools = { group = "com.google.firebase", name = "firebase-crashlytics-buildtools", version.ref = "firebaseCrashlyticsBuildtools" }
+ui-test-junit4 = { module = "androidx.compose.ui:ui-test-junit4" }
+ui-test-manifest = { module = "androidx.compose.ui:ui-test-manifest", version.ref = "uiTestManifest" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

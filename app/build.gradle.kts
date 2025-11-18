@@ -90,12 +90,17 @@ dependencies {
     implementation(libs.androidx.material3)
     implementation(libs.androidx.ui.text)
     implementation(libs.androidx.appcompat)
+    implementation(libs.firebase.crashlytics.buildtools)
 
     // ---------- Testing ----------
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
-    androidTestImplementation(libs.androidx.ui.test.junit4)
+    androidTestImplementation(libs.androidx.compose.ui.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
+
+
+
+
 }

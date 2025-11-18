@@ -1,6 +1,7 @@
 package com.example.skolar20.ui.screens
 
 import android.os.Build
+import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.activity.ComponentActivity
 import androidx.compose.foundation.layout.*
@@ -146,6 +147,12 @@ fun SettingsScreen() {
                     syncing = true
                     syncMessage = null
                     try {
+                        // Debug: list pending before
+                        val db = com.example.skolar20.data.local.OfflineDbHelper(context)
+                        val pendingList = db.debugListAsStrings()
+                        Log.d("DEBUG_SYNC", "Pending rows: ${pendingList.size}")
+                        pendingList.forEach { Log.d("DEBUG_SYNC", it) }
+
                         val count = com.example.skolar20.data.local.syncPendingBookings(context, auth)
                         syncMessage = context.getString(R.string.settings_sync_complete, count)
                     } catch (e: Exception) {
@@ -155,9 +162,9 @@ fun SettingsScreen() {
                     }
                 }
             },
-            enabled = !syncing,
-            modifier = Modifier.fillMaxWidth()
-        ) {
+
+        )
+        {
             Text(
                 if (syncing)
                     stringResource(id = R.string.settings_syncing)

@@ -27,6 +27,7 @@ import kotlinx.coroutines.tasks.await
 import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 import java.util.Calendar
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -53,6 +54,12 @@ fun NewBookingScreen(
     var info by remember { mutableStateOf<String?>(null) }
     var error by remember { mutableStateOf<String?>(null) }
 
+    // Dropdown state for tutors
+    var tutorsExpanded by remember { mutableStateOf(false) }
+
+    val dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
+    val timeFormatter = DateTimeFormatter.ofPattern("HH:mm")
+
     // Load tutors from backend
     LaunchedEffect(Unit) {
         try {
@@ -70,8 +77,8 @@ fun NewBookingScreen(
     fun tutorNameFor(id: String?): String? =
         tutors.firstOrNull { it.tutorId == id }?.name
 
-    val dateLabel = dateTime?.toLocalDate().toString()
-    val timeLabel = dateTime?.toLocalTime()?.withSecond(0)?.withNano(0).toString()
+    val dateLabel = dateTime?.format(dateFormatter) ?: ""
+    val timeLabel = dateTime?.format(timeFormatter) ?: ""
 
     Column(
         modifier = Modifier
@@ -88,10 +95,11 @@ fun NewBookingScreen(
             Text("Error loading tutors: $tutorError", color = MaterialTheme.colorScheme.error)
         }
 
-        // Tutor dropdown
+        // Tutor dropdown (properly expandable)
+        Text(text = "Tutor", style = MaterialTheme.typography.labelLarge)
         ExposedDropdownMenuBox(
-            expanded = false,
-            onExpandedChange = { } // simple static list usage – or you can expand properly if needed
+            expanded = tutorsExpanded,
+            onExpandedChange = { tutorsExpanded = !tutorsExpanded }
         ) {
             TextField(
                 value = tutorNameFor(selectedTutorId) ?: "Select tutor",
@@ -99,15 +107,28 @@ fun NewBookingScreen(
                 readOnly = true,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .menuAnchor()
-                    .clickable {
-                        // simple dialog alternative could be used; to keep it short we just pick first if none
-                        if (tutors.isNotEmpty() && selectedTutorId == null) {
-                            selectedTutorId = tutors.first().tutorId
-                        }
-                    },
-                label = { Text("Tutor") }
+                    .menuAnchor(),
+                label = { Text("Tutor") },
+                trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(tutorsExpanded) }
             )
+            ExposedDropdownMenu(
+                expanded = tutorsExpanded,
+                onDismissRequest = { tutorsExpanded = false }
+            ) {
+                if (tutors.isEmpty()) {
+                    DropdownMenuItem(text = { Text("No tutors available") }, onClick = { tutorsExpanded = false })
+                } else {
+                    tutors.forEach { t ->
+                        DropdownMenuItem(
+                            text = { Text(t.name ?: "Unknown") },
+                            onClick = {
+                                selectedTutorId = t.tutorId
+                                tutorsExpanded = false
+                            }
+                        )
+                    }
+                }
+            }
         }
 
         // Subject
@@ -211,6 +232,7 @@ fun NewBookingScreen(
                     )
 
                     try {
+                        // Online attempt: get token and call service (keeps your idToken param)
                         val token = user.getIdToken(false).await()?.token
                             ?: throw Exception("Could not get auth token")
 
@@ -222,10 +244,15 @@ fun NewBookingScreen(
                         // Optional: go back to bookings
                         navController.popBackStack(NavDestination.Bookings.route, false)
                     } catch (e: Exception) {
-                        // Online failed -> save offline
+                        // Online failed -> save offline with feedback
                         try {
-                            OfflineDbHelper(context).insertPendingBooking(bookingCreate)
-                            info = "No internet. Booking saved offline and will sync later."
+                            val db = OfflineDbHelper(context)
+                            val rowId = db.insertPendingBooking(bookingCreate)
+                            if (rowId > 0) {
+                                info = "No internet. Booking saved offline (local id=$rowId) and will sync later."
+                            } else {
+                                error = "Failed to save booking offline"
+                            }
                         } catch (e2: Exception) {
                             error = e2.localizedMessage ?: "Failed to save booking offline"
                         }
