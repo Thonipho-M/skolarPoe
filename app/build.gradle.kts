@@ -62,6 +62,11 @@ dependencies {
     // androidx.biometric:biometric:1.1.0
     implementation(libs.androidx.biometric)
 
+
+
+    //gemini
+    implementation("com.google.ai.client.generativeai:generativeai:0.9.0")
+
     // ---------- Firebase ----------
     implementation(platform("com.google.firebase:firebase-bom:34.3.0"))
     implementation("com.google.firebase:firebase-auth")

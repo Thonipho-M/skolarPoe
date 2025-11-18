@@ -1,3 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- App Name -->
+    <string name="app_name">Skolar</string>
+
+    <!-- Settings Screen -->
+    <string name="settings_title">Izilungiselelo</string>
+    <string name="settings_not_signed_in">Awukagcwalisanga</string>
+
+    <!-- Language -->
+    <string name="settings_language">Ulimi Lwesicelo</string>
+    <string name="settings_language_summary">Khetha ulimi lwesicelo</string>
+    <string name="lang_en">IsiNgisi</string>
+    <string name="lang_zu">IsiZulu</string>
+
+    <!-- Biometric -->
+    <string name="settings_biometric">Nika Amandla Ukuqinisekiswa Kwe-Biometric</string>
+    <string name="settings_biometric_enabled_msg">Ukuqinisekiswa kwe-biometric kunikwe amandla</string>
+    <string name="settings_biometric_disabled_msg">Ukuqinisekiswa kwe-biometric kukhubazekile</string>
+
+    <!-- Notifications -->
+    <string name="settings_notifications">Nika Amandla Izaziso</string>
+
+    <!-- Offline Sync -->
+    <string name="settings_offline_bookings">Ukubhukha Okungaxhunyiwe</string>
+    <string name="settings_sync">Vumelanisa Ukubhukha Okungaxhunyiwe</string>
+    <string name="settings_syncing">Ivumelanisa...</string>
+    <string name="settings_sync_complete">Kuvumelane ngempumelelo %1$d ukubhukha</string>
+    <string name="settings_no_pending">Akukho kubhukha okulindile</string>
+
+    <!-- Sign Out -->
+    <string name="settings_sign_out">Phuma</string>
+    <string name="settings_signed_out">Uphumile ngempumelelo</string>
+
+    <!-- Navigation -->
+    <string name="nav_home">Ikhaya</string>
+    <string name="nav_tutors">Othisha</string>
+    <string name="nav_bookings">Ukubhukha</string>
+    <string name="nav_chatbot">I-Chatbot</string>
+    <string name="nav_settings">Izilungiselelo</string>
+</resources>
 <resources>
     <string name="app_name">Skolar2.0</string>
 

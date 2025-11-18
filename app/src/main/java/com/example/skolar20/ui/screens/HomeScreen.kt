@@ -28,7 +28,7 @@ fun HomeScreen(navController: NavController) {
             Button(onClick = { navController.navigate(NavDestination.Bookings.route) }, modifier = Modifier.weight(1f)) { Text("My Bookings") }
         }
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            Button(onClick = { navController.navigate(NavDestination.Messages.route) }, modifier = Modifier.weight(1f)) { Text("Messages") }
+            Button(onClick = { navController.navigate(NavDestination.Chatbot.route) }, modifier = Modifier.weight(1f)) { Text("Chatbot") }
             Button(onClick = { navController.navigate(NavDestination.Settings.route) }, modifier = Modifier.weight(1f)) { Text("Settings") }
         }
     }

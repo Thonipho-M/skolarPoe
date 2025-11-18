@@ -58,7 +58,7 @@ fun App() {
         currentRoute == NavDestination.Home.route -> "Home"
         currentRoute == NavDestination.Tutors.route -> "Tutors"
         currentRoute == NavDestination.Bookings.route -> "My Bookings"
-        currentRoute == NavDestination.Messages.route -> "Messages"
+        currentRoute == NavDestination.Chatbot.route -> "Chatbot"
         currentRoute == NavDestination.Settings.route -> "Settings"
         // If you navigate to a create-booking route like "booking_new?...":
         currentRoute.startsWith("booking_new") -> "New Booking"
@@ -69,7 +69,7 @@ fun App() {
         NavDestination.Home,
         NavDestination.Tutors,
         NavDestination.Bookings,
-        NavDestination.Messages,
+        NavDestination.Chatbot,
         NavDestination.Settings
     )
 
@@ -83,7 +83,7 @@ fun App() {
                         NavDestination.Home -> Icons.Default.Home
                         NavDestination.Tutors -> Icons.Default.AccountCircle
                         NavDestination.Bookings -> Icons.Default.Add
-                        NavDestination.Messages -> Icons.Default.Email
+                        NavDestination.Chatbot -> Icons.Default.Email
                         NavDestination.Settings -> Icons.Default.Settings
                     }
                     NavigationBarItem(

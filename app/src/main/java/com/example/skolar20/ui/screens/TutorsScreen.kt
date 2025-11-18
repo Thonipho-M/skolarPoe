@@ -10,7 +10,6 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.skolar20.data.remote.FirestoreService
 import com.example.skolar20.data.model.Tutor
-import com.example.skolar20.navigation.ROUTE_NEW_BOOKING
 
 @Composable
 fun TutorsScreen(navController: NavController) {
@@ -37,9 +36,11 @@ fun TutorsScreen(navController: NavController) {
             loading -> LinearProgressIndicator(Modifier.fillMaxWidth())
             error != null -> Text("Error: $error", color = MaterialTheme.colorScheme.error)
             else -> LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                items(tutors) { tutor -> TutorCard(tutor) {
-                    navController.navigate("$ROUTE_NEW_BOOKING?tutorId=${tutor.tutorId}")
-                } }
+                items(tutors) { tutor ->
+                    TutorCard(tutor) {
+                        navController.navigate("booking_new?tutorId=${tutor.tutorId}")
+                    }
+                }
             }
         }
     }
@@ -48,7 +49,12 @@ fun TutorsScreen(navController: NavController) {
 @Composable
 private fun TutorCard(tutor: Tutor, onRequest: () -> Unit) {
     Card {
-        Column(Modifier.fillMaxWidth().padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+        Column(
+            Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(6.dp)
+        ) {
             Text(tutor.name, style = MaterialTheme.typography.titleMedium)
             Text("Expertise: ${tutor.expertise.joinToString()}")
             Text("Qualifications: ${tutor.qualifications}")

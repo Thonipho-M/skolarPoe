@@ -24,7 +24,7 @@ fun SkolarRoot() {
         NavDestination.Home,
         NavDestination.Tutors,     // ✅ active feature
         NavDestination.Bookings,   // 🚧 placeholder
-        NavDestination.Messages,   // 🚧 placeholder
+        NavDestination.Chatbot,   // 🚧 placeholder
         NavDestination.Settings    // ✅ simple settings UI
     )
     val backStack by navController.currentBackStackEntryAsState()
@@ -39,7 +39,7 @@ fun SkolarRoot() {
                         NavDestination.Home -> Icons.Default.Home
                         NavDestination.Tutors -> Icons.Default.AccountCircle
                         NavDestination.Bookings -> Icons.Default.Add
-                        NavDestination.Messages -> Icons.Default.Email
+                        NavDestination.Chatbot -> Icons.Default.Email
                         NavDestination.Settings -> Icons.Default.Settings
                     }
                     NavigationBarItem(

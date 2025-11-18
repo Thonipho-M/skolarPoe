@@ -17,7 +17,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import com.example.skolar20.data.remote.FirestoreService
 import com.example.skolar20.data.model.Booking
-import com.example.skolar20.navigation.ROUTE_NEW_BOOKING
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 
@@ -50,12 +49,17 @@ fun BookingsScreen(navController: NavController) {
 
     Scaffold(
         floatingActionButton = {
-            FloatingActionButton(onClick = { navController.navigate(ROUTE_NEW_BOOKING) }) {
+            FloatingActionButton(onClick = { navController.navigate("booking_new") }) {
                 Icon(Icons.Default.Add, contentDescription = "New booking")
             }
         }
     ) { inner ->
-        Column(Modifier.fillMaxSize().padding(inner).padding(16.dp)) {
+        Column(
+            Modifier
+                .fillMaxSize()
+                .padding(inner)
+                .padding(16.dp)
+        ) {
             Text("My Bookings", style = MaterialTheme.typography.titleLarge)
             Spacer(Modifier.height(8.dp))
 
@@ -79,7 +83,12 @@ private fun BookingCard(b: Booking) {
             .format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"))
     }
     Card {
-        Column(Modifier.fillMaxWidth().padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+        Column(
+            Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(6.dp)
+        ) {
             Text(b.subject, style = MaterialTheme.typography.titleMedium)
             Text("Tutor: ${b.tutorName ?: b.tutorId}")
             Text("When: $dtLocal")

@@ -7,7 +7,7 @@
     <string name="sign_in">Sign in</string>
     <string name="email">Email</string>
     <string name="password">Password</string>
-    <string name="toggle_login_signup">I’m new — create an account</string>
+    <string name="toggle_login_signup">I\'m new — create an account</string>
     <string name="toggle_have_account">I already have an account — sign in</string>
 
     <!-- Biometric -->
@@ -18,29 +18,33 @@
     <!-- Settings -->
     <string name="settings_title">Settings</string>
     <string name="settings_not_signed_in">Not signed in</string>
-    <string name="settings_biometric">Protect app with biometrics</string>
-    <string name="settings_biometric_enabled_msg">Biometric lock enabled. Next time we will ask for fingerprint/face.</string>
-    <string name="settings_biometric_disabled_msg">Biometric lock disabled.</string>
-    <string name="settings_notifications">Notifications</string>
-    <string name="settings_sync">Sync offline bookings</string>
-    <string name="settings_syncing">Syncing…</string>
-    <string name="settings_sync_complete">%1$d booking(s) synced.</string>
-    <string name="settings_sign_out">Sign out</string>
-    <string name="settings_signed_out">You have been signed out.</string>
+    <string name="settings_biometric">Enable Biometric Authentication</string>
+    <string name="settings_biometric_enabled_msg">Biometric authentication enabled</string>
+    <string name="settings_biometric_disabled_msg">Biometric authentication disabled</string>
+    <string name="settings_notifications">Enable Notifications</string>
+    <string name="settings_sync">Sync Offline Bookings</string>
+    <string name="settings_syncing">Syncing...</string>
+    <string name="settings_sync_complete">Successfully synced %1$d booking(s)</string>
+    <string name="settings_no_pending">No pending bookings to sync</string>
+    <string name="settings_sign_out">Sign Out</string>
+    <string name="settings_signed_out">Signed out successfully</string>
+
+    <!-- Language -->
+    <string name="settings_language">App Language</string>
+    <string name="settings_language_summary">Select app language</string>
+    <string name="lang_en">English</string>
+    <string name="lang_zu">isiZulu</string>
+
+    <!-- Offline Sync -->
+    <string name="settings_offline_bookings">Offline Bookings</string>
 
     <!-- Notifications -->
     <string name="notification_default_title">Skolar update</string>
     <string name="notification_default_body">You have a new update.</string>
 
-    <!-- Language names -->
-    <string name="lang_en">English</string>
-    <string name="lang_zu">isiZulu</string>
-    <string name="settings_language">App language</string>
-    <string name="settings_language_summary">Select app language</string>
-
-    <!-- Messages / Chatbot -->
-    <string name="messages_title">Messages</string>
-    <string name="messages_hint">Type a message...</string>
+    <!-- Chatbot -->
+    <string name="Chatbot_title">Chatbot</string>
+    <string name="Chatbot_hint">Type a message...</string>
     <string name="bot_default_reply">Sorry, I didn\'t understand that. Try: "hours", "price", "help".</string>
     <string name="bot_greeting">Hello! I am SkolarBot. How can I help you?</string>
     <string name="bot_hours">Our working hours are Mon-Fri, 08:00-17:00.</string>
