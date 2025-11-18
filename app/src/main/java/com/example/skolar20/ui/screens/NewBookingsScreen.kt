@@ -16,18 +16,16 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import com.example.skolar20.data.local.OfflineDbHelper
 import com.example.skolar20.data.model.BookingCreate
 import com.example.skolar20.data.model.Tutor
 import com.example.skolar20.data.remote.FirestoreService
 import com.example.skolar20.navigation.NavDestination
+import com.example.skolar20.ui.NotificationHelper
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
-import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneId
-import java.time.format.DateTimeFormatter
 import java.util.Calendar
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -54,12 +52,6 @@ fun NewBookingScreen(
     var info by remember { mutableStateOf<String?>(null) }
     var error by remember { mutableStateOf<String?>(null) }
 
-    // Dropdown state for tutors
-    var tutorsExpanded by remember { mutableStateOf(false) }
-
-    val dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
-    val timeFormatter = DateTimeFormatter.ofPattern("HH:mm")
-
     // Load tutors from backend
     LaunchedEffect(Unit) {
         try {
@@ -77,8 +69,8 @@ fun NewBookingScreen(
     fun tutorNameFor(id: String?): String? =
         tutors.firstOrNull { it.tutorId == id }?.name
 
-    val dateLabel = dateTime?.format(dateFormatter) ?: ""
-    val timeLabel = dateTime?.format(timeFormatter) ?: ""
+    val dateLabel = dateTime?.toLocalDate().toString()
+    val timeLabel = dateTime?.toLocalTime()?.withSecond(0)?.withNano(0).toString()
 
     Column(
         modifier = Modifier
@@ -95,11 +87,12 @@ fun NewBookingScreen(
             Text("Error loading tutors: $tutorError", color = MaterialTheme.colorScheme.error)
         }
 
-        // Tutor dropdown (properly expandable)
-        Text(text = "Tutor", style = MaterialTheme.typography.labelLarge)
+        // Tutor dropdown
+        var tutorExpanded by remember { mutableStateOf(false) }
+
         ExposedDropdownMenuBox(
-            expanded = tutorsExpanded,
-            onExpandedChange = { tutorsExpanded = !tutorsExpanded }
+            expanded = tutorExpanded,
+            onExpandedChange = { tutorExpanded = !tutorExpanded }
         ) {
             TextField(
                 value = tutorNameFor(selectedTutorId) ?: "Select tutor",
@@ -109,24 +102,21 @@ fun NewBookingScreen(
                     .fillMaxWidth()
                     .menuAnchor(),
                 label = { Text("Tutor") },
-                trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(tutorsExpanded) }
+                trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = tutorExpanded) }
             )
+
             ExposedDropdownMenu(
-                expanded = tutorsExpanded,
-                onDismissRequest = { tutorsExpanded = false }
+                expanded = tutorExpanded,
+                onDismissRequest = { tutorExpanded = false }
             ) {
-                if (tutors.isEmpty()) {
-                    DropdownMenuItem(text = { Text("No tutors available") }, onClick = { tutorsExpanded = false })
-                } else {
-                    tutors.forEach { t ->
-                        DropdownMenuItem(
-                            text = { Text(t.name ?: "Unknown") },
-                            onClick = {
-                                selectedTutorId = t.tutorId
-                                tutorsExpanded = false
-                            }
-                        )
-                    }
+                tutors.forEach { tutor ->
+                    DropdownMenuItem(
+                        text = { Text(tutor.name) },
+                        onClick = {
+                            selectedTutorId = tutor.tutorId
+                            tutorExpanded = false
+                        }
+                    )
                 }
             }
         }
@@ -232,7 +222,6 @@ fun NewBookingScreen(
                     )
 
                     try {
-                        // Online attempt: get token and call service (keeps your idToken param)
                         val token = user.getIdToken(false).await()?.token
                             ?: throw Exception("Could not get auth token")
 
@@ -241,21 +230,19 @@ fun NewBookingScreen(
                             idToken = token
                         )
                         info = "Booking created (#$createdId)"
-                        // Optional: go back to bookings
+
+                        // Send notification
+                        NotificationHelper.sendBookingNotification(
+                            context = context,
+                            title = "Booking Confirmed! 🎓",
+                            message = "Your booking for $subject with ${tutorNameFor(selectedTutorId)} has been confirmed"
+                        )
+
                         navController.popBackStack(NavDestination.Bookings.route, false)
                     } catch (e: Exception) {
-                        // Online failed -> save offline with feedback
-                        try {
-                            val db = OfflineDbHelper(context)
-                            val rowId = db.insertPendingBooking(bookingCreate)
-                            if (rowId > 0) {
-                                info = "No internet. Booking saved offline (local id=$rowId) and will sync later."
-                            } else {
-                                error = "Failed to save booking offline"
-                            }
-                        } catch (e2: Exception) {
-                            error = e2.localizedMessage ?: "Failed to save booking offline"
-                        }
+                        // Offline mode - just show message, no offline DB for now
+                        info = "Could not create booking. Please check your internet connection."
+                        error = e.localizedMessage ?: "Failed to create booking"
                     } finally {
                         formBusy = false
                     }

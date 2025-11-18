@@ -1,22 +1,18 @@
 package com.example.skolar20.ui.screens
 
 import android.os.Build
-import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.activity.ComponentActivity
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
-import androidx.compose.material3.ExposedDropdownMenuBox
-import androidx.compose.material3.ExposedDropdownMenuDefaults
-import androidx.compose.material3.TextField
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.platform.LocalDensity
 import com.example.skolar20.R
+import com.example.skolar20.data.local.OfflineDbHelper
+import com.example.skolar20.data.local.syncPendingBookings
 import com.example.skolar20.util.LocaleHelper
 import com.example.skolar20.util.Preferences
 import com.google.firebase.auth.FirebaseAuth
@@ -32,15 +28,27 @@ fun SettingsScreen() {
 
     var info by remember { mutableStateOf<String?>(null) }
     var biometricEnabled by remember { mutableStateOf(Preferences.isBiometricEnabled(context)) }
-    var notificationsEnabled by remember { mutableStateOf(true) }
+    var notificationsEnabled by remember { mutableStateOf(Preferences.isNotificationsEnabled(context)) }
+
+    // Offline sync state
     var syncing by remember { mutableStateOf(false) }
     var syncMessage by remember { mutableStateOf<String?>(null) }
+    var pendingCount by remember { mutableStateOf(0) }
+
+    // Load pending count on start
+    LaunchedEffect(Unit) {
+        try {
+            val db = OfflineDbHelper(context)
+            pendingCount = db.getPendingCount()
+        } catch (e: Exception) {
+            // Ignore
+        }
+    }
 
     // Language setup
-    val savedLang = Preferences.getSelectedLanguage(context) ?: "en"
+    val savedLang = LocaleHelper.getLanguage(context)
     var expanded by remember { mutableStateOf(false) }
 
-    // Important: use stringResource inside composition so it resolves per locale
     val languages = listOf(
         "en" to stringResource(id = R.string.lang_en),
         "zu" to stringResource(id = R.string.lang_zu)
@@ -64,7 +72,7 @@ fun SettingsScreen() {
             style = MaterialTheme.typography.bodyMedium
         )
 
-        Divider()
+        HorizontalDivider()
 
         // Language selector
         Text(text = stringResource(id = R.string.settings_language), style = MaterialTheme.typography.titleMedium)
@@ -73,16 +81,15 @@ fun SettingsScreen() {
             expanded = expanded,
             onExpandedChange = { expanded = !expanded }
         ) {
-            // <-- menuAnchor() is the important fix
             TextField(
                 value = selectedLangLabel,
                 onValueChange = {},
                 readOnly = true,
-                label = { Text(text = stringResource(id = R.string.settings_language_summary)) },
+                label = { Text(stringResource(id = R.string.settings_language_summary)) },
                 trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .menuAnchor()    // <-- anchors dropdown to this field
+                    .menuAnchor()
             )
 
             ExposedDropdownMenu(
@@ -96,8 +103,6 @@ fun SettingsScreen() {
                             expanded = false
                             selectedLangCode = code
                             selectedLangLabel = label
-                            // persist selection & apply immediately
-                            Preferences.setSelectedLanguage(context, code)
                             LocaleHelper.setLocale(context, code)
                             (context as? ComponentActivity)?.recreate()
                         }
@@ -106,7 +111,7 @@ fun SettingsScreen() {
             }
         }
 
-        Divider()
+        HorizontalDivider()
 
         // Biometric toggle
         Row(
@@ -128,7 +133,7 @@ fun SettingsScreen() {
             )
         }
 
-        // Notifications toggle (demo only)
+        // Notifications toggle
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween
@@ -136,48 +141,72 @@ fun SettingsScreen() {
             Text(stringResource(id = R.string.settings_notifications))
             Switch(
                 checked = notificationsEnabled,
-                onCheckedChange = { notificationsEnabled = it }
+                onCheckedChange = {
+                    notificationsEnabled = it
+                    Preferences.setNotificationsEnabled(context, it)
+                    info = if (it) "Notifications enabled" else "Notifications disabled"
+                }
             )
         }
 
-        // Offline bookings sync
+        HorizontalDivider()
+
+        // Offline sync section
+        Text(text = stringResource(id = R.string.settings_offline_bookings), style = MaterialTheme.typography.titleMedium)
+
+        if (pendingCount > 0) {
+            Text(
+                text = "$pendingCount booking(s) waiting to sync",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.primary
+            )
+        }
+
         Button(
             onClick = {
                 scope.launch {
                     syncing = true
                     syncMessage = null
                     try {
-                        // Debug: list pending before
-                        val db = com.example.skolar20.data.local.OfflineDbHelper(context)
-                        val pendingList = db.debugListAsStrings()
-                        Log.d("DEBUG_SYNC", "Pending rows: ${pendingList.size}")
-                        pendingList.forEach { Log.d("DEBUG_SYNC", it) }
-
-                        val count = com.example.skolar20.data.local.syncPendingBookings(context, auth)
-                        syncMessage = context.getString(R.string.settings_sync_complete, count)
+                        val count = syncPendingBookings(context, auth)
+                        syncMessage = if (count > 0) {
+                            context.getString(R.string.settings_sync_complete, count)
+                        } else {
+                            context.getString(R.string.settings_no_pending)
+                        }
+                        // Refresh pending count
+                        val db = OfflineDbHelper(context)
+                        pendingCount = db.getPendingCount()
                     } catch (e: Exception) {
-                        syncMessage = e.localizedMessage ?: "Sync failed"
+                        syncMessage = "Sync failed: ${e.message}"
                     } finally {
                         syncing = false
                     }
                 }
             },
-
-        )
-        {
-            Text(
-                if (syncing)
-                    stringResource(id = R.string.settings_syncing)
-                else
-                    stringResource(id = R.string.settings_sync)
-            )
+            enabled = !syncing,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            if (syncing) {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(20.dp),
+                    strokeWidth = 2.dp,
+                    color = MaterialTheme.colorScheme.onPrimary
+                )
+                Spacer(Modifier.width(8.dp))
+            }
+            Text(stringResource(id = if (syncing) R.string.settings_syncing else R.string.settings_sync))
         }
 
         if (syncMessage != null) {
-            Text(syncMessage!!, style = MaterialTheme.typography.bodySmall)
+            Text(
+                syncMessage!!,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.primary
+            )
         }
 
-        Divider()
+        HorizontalDivider()
 
         // Sign out
         Button(
