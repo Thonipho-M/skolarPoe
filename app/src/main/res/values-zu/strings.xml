@@ -39,3 +39,50 @@
     <string name="nav_chatbot">I-Chatbot</string>
     <string name="nav_settings">Izilungiselelo</string>
 </resources>
+<resources>
+    <string name="app_name">Skolar2.0</string>
+
+    <!-- Login -->
+    <string name="sign_in_google">Ngena nge-Google</string>
+    <string name="create_account">Dala i-akhawunti</string>
+    <string name="sign_in">Ngena ngemvume</string>
+    <string name="email">I-imeyili</string>
+    <string name="password">Iphasiwedi</string>
+    <string name="toggle_login_signup">Ngisanda qala — dala i-akhawunti</string>
+    <string name="toggle_have_account">Senginenkathi — ngena ngemvume</string>
+
+    <!-- Biometric -->
+    <string name="biometric_title">Vula i-Skolar</string>
+    <string name="biometric_subtitle">Sebenzisa umunwe noma ubuso bakho</string>
+    <string name="biometric_use_password">Sebenzisa iphasiwedi</string>
+
+    <!-- Settings -->
+    <string name="settings_title">Izilungiselelo</string>
+    <string name="settings_not_signed_in">Awungenanga ngemvume</string>
+    <string name="settings_biometric">Vikela uhlelo nge-biometrics</string>
+    <string name="settings_biometric_enabled_msg">I-biometric lock ivuliwe. Ngokuzayo sizocela umunwe noma ubuso.</string>
+    <string name="settings_biometric_disabled_msg">I-biometric lock icishiwe.</string>
+    <string name="settings_notifications">Izaziso</string>
+    <string name="settings_sync">Hlanganisa ama-booking angaphandle kwe-inthanethi</string>
+    <string name="settings_syncing">Iyahlanganisa…</string>
+    <string name="settings_sync_complete">Kuhlanganiswe ama-booking angu-%1$d.</string>
+    <string name="settings_sign_out">Phuma</string>
+    <string name="settings_signed_out">Uphumile ohlelweni.</string>
+
+    <!-- Notifications -->
+    <string name="notification_default_title">Isaziso se-Skolar</string>
+    <string name="notification_default_body">Unesibuyekezo esisha.</string>
+
+    <string name="lang_en">English</string>
+    <string name="lang_zu">isiZulu</string>
+    <string name="settings_language">Ulimi lohlelo</string>
+    <string name="settings_language_summary">Khetha ulimi lohlelo</string>
+
+    <string name="messages_title">Imiyalezo</string>
+    <string name="messages_hint">Thayipa umlayezo...</string>
+    <string name="bot_default_reply">Uxolo, angiqondi. Zama: "hours", "price", "help".</string>
+    <string name="bot_greeting">Sawubona! NginguSkolarBot. Ngingakusiza kanjani?</string>
+    <string name="bot_hours">Amahora wethu: M-S 08:00–17:00.</string>
+    <string name="bot_price">Amanani ahlukahlukene; xhumana nothisha ukuze uthole imininingwane.</string>
+
+</resources>
